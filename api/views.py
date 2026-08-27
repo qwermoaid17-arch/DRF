@@ -2,26 +2,27 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT
+from rest_framework.views import APIView
 from .serializers import *
 from storeapp.models import Product, Category
 
-@api_view(['GET', 'POST', 'PUT'])
-def api_products(request):
+class api_products(APIView):
 
-    if request.method=='GET':
+    def get(self, request):
 
         products = Product.objects.all()
         serial = ProductSerial(products, many = True)
-        return Response(serial.data)
-    
-    if request.method=='POST':
+        return Response(serial.data) gggsfdds
+
+    def post(self, request):
+
         serializer = ProductSerial(data = request.data)
 
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
-    if request.method=='PUT':
+    def put(self, request):
 
         pk = request.data.get('id')
 
@@ -35,17 +36,19 @@ def api_products(request):
 
         return Response(serializer.data)
 
-@api_view(['GET',  'PUT', 'PATCH', 'DELETE'])
-def api_product(request, pk):
-        
-    product = get_object_or_404(Product, id=pk)
+class api_product(APIView):
 
-    if request.method=='GET':
+    def get(self, request, pk):
+
+        
+        product = get_object_or_404(Product, id=pk)
 
         serializer = ProductSerial(product)
         return Response(serializer.data)
-    
-    if request.method=='PUT':
+
+    def put(self, request,pk):
+
+        product = get_object_or_404(Product, id=pk)
 
         serializer= ProductSerial(product, data=request.data)
 
@@ -54,42 +57,84 @@ def api_product(request, pk):
         serializer.save()
 
         return Response(serializer.data, status=200)
-    
-    if request.method=='PATCH':
+
+    def patch(self, request, pk):
+
+        product = get_object_or_404(Product, id=pk)
 
         serializer= ProductSerial(product, data = request.data, partial= True)
 
-        if serializer.is_valid():
+        serializer.is_valid(raise_exception=True)
 
-            serializer.save()
+        serializer.save()
 
-            return Response(serializer.data, status=200)
+        return Response(serializer.data, status=200)
 
-    if request.method=='DELETE':
+    def delete(self, request, pk):
+
+        product = get_object_or_404(Product, id=pk)
 
         product.delete()
 
-        return Response(status=HTTP_204_NO_CONTENT)
-        
-        
-@api_view(['GET', 'POST', 'PUT', 'PATCH'])
-def api_categories(request):
+        return Response(status=HTTP_204_NO_CONTENT)    
 
-    if request.method=='GET':
+class api_category(APIView):
+
+    def get(self, request, pk):
+
+        category = get_object_or_404(Category, category_id=pk)
+        serializer = CategorySerial(category)
+        return Response(serializer.data)
+
+
+    def put(self, request,pk):
+
+        categor = get_object_or_404(Category, category_id=pk)
+
+        serializer= CategorySerial(categor, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+
+    def patch(self, request, pk):
+
+        categor = get_object_or_404(Category, category_id=pk)
+
+        serializer= CategorySerial(categor, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request, pk):
+
+        categor = get_object_or_404(Category, category_id=pk)
+  
+        categor.delete()
+
+        return Response(status=HTTP_204_NO_CONTENT)
+
+
+class api_categories(APIView):
+
+    def get(self, request):
 
         categories = Category.objects.all()
         serial = CategorySerial(categories, many = True)
         return Response(serial.data)
-    
-    if request.method=='POST':
+
+
+    def post(self, request):
 
         serializer = CategorySerial(data=request.data)
 
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=201)
-    
-    if request.method=='PUT':
+
+
+    def put(self, request):
 
         pk = request.data.get('category_id')
 
@@ -101,7 +146,7 @@ def api_categories(request):
         serializer.save()
         return Response(serializer.data)
 
-    if request.method=='PATCH':
+    def patch(self, request):
 
         pk = request.data.get('category_id')
 
@@ -113,41 +158,3 @@ def api_categories(request):
         serializer.save()
         return Response(serializer.data)
     
-@api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
-def api_category(request, pk):
-
-    
-    categor = get_object_or_404(Category, category_id=pk)
-
-    if request.method=='GET':
-
-        category = get_object_or_404(Category, category_id=pk)
-        serializer = CategorySerial(category)
-        return Response(serializer.data)
-    
-    if request.method=='POST':
-
-        serializer=CategorySerial(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data )
-
-    if request.method=='PUT':
-
-        serializer= CategorySerial(categor, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
-    if request.method=='PATCH':
-
-        serializer= CategorySerial(categor, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
-    if request.method=='DELETE':
-
-        categor.delete()
-
-        return Response(status=HTTP_204_NO_CONTENT)
