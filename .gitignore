@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+
+# Django
+*.log
+*.pot
+*.pyc
+*.mo
+db.sqlite3
+/staticfiles/
+/media/
+
+# IDE / Editors
+.vscode/
+.idea/
+
+# System files
+desktop.ini
+Thumbs.db
+
+# Environment variables
+.env
+
+# MySQL dumps and configs
+*.sql
+*.cnf
+*.ini
+
+# Node.js (لو عندك frontend)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# MacOS system files
+.DS_Store
+
+# Backup files
+*.bak
+*.swp

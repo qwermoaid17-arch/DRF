@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'storeapp',
     'core',
     'UserProfile',
-    'rest_framework'
+    'rest_framework',
+    'django_filters'
 ]
 
 MIDDLEWARE = [
@@ -84,8 +85,11 @@ WSGI_APPLICATION = 'ecommerce.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST' : 'localhost',
+        'NAME': 'mysql80',
+        'USER' : 'root',
+        'PASSWORD' : 'moiadQWER-92'
     }
 }
 
