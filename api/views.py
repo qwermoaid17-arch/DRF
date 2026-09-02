@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
@@ -39,3 +40,8 @@ class Review_View_Set(ModelViewSet):
     def get_queryset(self):
 
         return Review.objects.filter(product_id=self.kwargs['product_pk'])
+
+class Cart_View_Set(CreateModelMixin, RetrieveModelMixin,DestroyModelMixin, GenericViewSet):
+
+    queryset= Cart.objects.all()
+    serializer_class = Cart_Serializer
