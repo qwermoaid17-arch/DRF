@@ -70,8 +70,6 @@ class ProductImage(models.Model):
     image = models.ImageField(upload_to='img', blank = True, null=True)
 
 
-
-
 class Cart(models.Model):
     owner = models.ForeignKey(Customer, on_delete=models.CASCADE, null = True, blank=True)
     cart_id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
