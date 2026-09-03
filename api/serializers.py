@@ -59,7 +59,7 @@ class single_product_serial(serializers.ModelSerializer):
         model = Product
         fields = ['name', 'old_price']
 
-class Cart_item(serializers.ModelSerializer):
+class Cart_item_serializer(serializers.ModelSerializer):
 
     product = single_product_serial(many=False)
     sub_total = serializers.SerializerMethodField(method_name='total')
@@ -75,7 +75,7 @@ class Cart_item(serializers.ModelSerializer):
 class Cart_Serializer(serializers.ModelSerializer):
 
     cart_id = serializers.UUIDField(read_only=True)
-    items = Cart_item(many=True, read_only=True)
+    items = Cart_item_serializer(many=True, read_only=True)
 
     def main_total(self, cart: Cart):
 
