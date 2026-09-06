@@ -101,6 +101,12 @@ class add_cart_item_serializer(serializers.ModelSerializer):
     class Meta:
         model = Cartitems
         fields = ['id', 'product_id', 'quantity']
+
+class Updata_cart_items_serializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Cartitems
+        fields = ['quantity']
     
 class Cart_Serializer(serializers.ModelSerializer):
 

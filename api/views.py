@@ -50,18 +50,19 @@ class CartItem_View_Set(ModelViewSet):
 
     # queryset = Cartitems.objects.all()
     # serializer_class = Cart_item_serializer
-
+    http_method_names = ['post', 'get', 'delete', 'patch']
     def get_serializer_class(self):
 
         if self.request.method=='POST':
             return add_cart_item_serializer
+        
+        elif self.request.method == 'PATCH':
+            return Updata_cart_items_serializer
 
-        else:
-            return Cart_item_serializer
+        return Cart_item_serializer
 
     def get_serializer_context(self):
         return {'cart_id' : self.kwargs['cart_pk']}
 
     def get_queryset(self):
         return Cartitems.objects.filter(cart_id=self.kwargs['cart_pk'])
-
