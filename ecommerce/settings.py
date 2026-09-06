@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+from datetime import timedelta as dt
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,7 +45,8 @@ INSTALLED_APPS = [
     'core',
     'UserProfile',
     'rest_framework',
-    'django_filters'
+    'django_filters',
+    'djoser'
 ]
 
 MIDDLEWARE = [
@@ -149,10 +151,26 @@ AUTH_USER_MODEL = 'core.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS' : 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE' : 3
+    'PAGE_SIZE' : 3,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+    'rest_framework_simplejwt.authentication.JWTAuthentication',
+
+    ),
 }
 
 
+SIMPLE_JWT = {
+   'AUTH_HEADER_TYPES': ('JWT',),
+    'ACCESS_TOKEN_LIFETIME' : dt(seconds=30),
+    'REFRESH_TOKEN_LIFETIME' : dt(days=7)
+}
+
+DJOSER={
+    'SERIALIZERS' : {
+        'user_create' : 'core.serializers.My_user_create_serializers',
+
+    }
+}
 
 
 

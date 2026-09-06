@@ -24,5 +24,7 @@ urlpatterns = [
     path('', include('storeapp.urls')),
     path('user/', include('UserProfile.urls')),
     path('api/', include('api.urls')),
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
