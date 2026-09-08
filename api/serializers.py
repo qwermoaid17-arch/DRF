@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from storeapp.models import *
+from django.db import transaction
 
 class CategorySerial(serializers.ModelSerializer):
 
@@ -158,6 +159,32 @@ class Order_serializer(serializers.ModelSerializer):
         model = Order
         fields = ('id', 'placed_at', 'pending_status', 'owner', 'items', 'big_total')
 
+class Order_Create_Serializer(serializers.Serializer):
+
+    cart_id = serializers.UUIDField()
+
+    with transaction.atomic():
+
+        def save(self, **kwargs):
+
+            cart_id = self.validated_data['cart_id']
+            user_id = self.context['user_id']
+            order = Order.objects.create(owner_id = user_id)
+            cart_items = Cartitems.objects.filter(cart_id=cart_id)
+
+            order_items = [OrderItem (
+                order=order,
+                product= item.product,
+                quantity= item.quantity
+                ) 
+            for item in cart_items
+            ]
+
+            OrderItem.objects.bulk_create(order_items)
+            Cart.objects.get(cart_id=cart_id).delete()
+
+            return order
+    
 class Profile_serializer(serializers.ModelSerializer):
 
     class Meta:
