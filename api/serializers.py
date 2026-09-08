@@ -121,7 +121,46 @@ class Cart_Serializer(serializers.ModelSerializer):
 
     big_total = serializers.SerializerMethodField(method_name='main_total')
 
+    
+
     class Meta:
 
         model = Cart
         fields = ['cart_id', 'items', 'big_total']
+
+class OrderItem_serializer(serializers.ModelSerializer):
+
+    product = single_product_serial()
+
+    total = serializers.SerializerMethodField()
+
+    def get_total(self, order_item: OrderItem):
+        return order_item.quantity * order_item.product.price
+    
+
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'product', 'quantity', 'total']
+
+class Order_serializer(serializers.ModelSerializer):
+
+    items = OrderItem_serializer(many=True, read_only=True)
+
+    def main_total(self, order: Order):
+
+        items = order.items.all()
+        total = sum([ item.quantity * item.product.price for item in items])
+        return total
+
+    big_total = serializers.SerializerMethodField(method_name='main_total')
+
+    class Meta:
+        model = Order
+        fields = ('id', 'placed_at', 'pending_status', 'owner', 'items', 'big_total')
+
+class Profile_serializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = profile
+        fields = ['id', 'name', 'bio', 'image']

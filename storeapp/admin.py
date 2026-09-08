@@ -14,4 +14,5 @@ admin.site.register(Cart)
 admin.site.register(Cartitems)
 admin.site.register(Customer)
 admin.site.register(SavedItem)
-
+admin.site.register(Order)
+admin.site.register(OrderItem)
