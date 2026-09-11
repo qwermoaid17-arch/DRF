@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
-from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_201_CREATED
+from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_201_CREATED, HTTP_200_OK
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
@@ -14,6 +14,47 @@ from storeapp.models import Product, Category
 from .filter import *
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
+from django.conf import settings
+
+import stripe
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+def initiate_payment(amount, email, order_id):
+    try:
+        # إنشاء جلسة الدفع عبر Stripe
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {
+                            "name": f"Order {order_id}",
+                        },
+                        "unit_amount": int(
+                            amount * 100
+                        ),  # الضرب في 100 لتحويل المبلغ إلى سنتات (Cents)
+                    },
+                    "quantity": 1,
+                }
+            ],
+            mode="payment",
+            customer_email=email,
+            # رابط التوجيه بعد نجاح عملية الدفع
+            success_url=f"http://127.0.0.1:8000/api/orders/{order_id}/success_payment/",
+            # رابط التوجيه عند إلغاء عملية الدفع
+            cancel_url="http://127.0.0.1:8000/api/orders/",
+        )
+
+        # إرجاع رابط صفحة الدفع الخاص بـ Stripe
+        return checkout_session.url
+
+    except Exception as e:
+        return str(e)
+
+
+
 
 class Products_View_Set(ModelViewSet):
 
@@ -74,6 +115,33 @@ class Order_View_Set(ModelViewSet):
     # queryset = Order.objects.all()
     # serializer_class = Order_serializer
     permission_classes = [IsAuthenticated]
+
+    @action(detail=True, methods=['POST'])
+    def pay(self, request, pk):
+        order= self.get_object()
+        amount = order.total_price
+        email = request.user.email
+        order_id = str(order.id)
+
+        payment_url = initiate_payment(amount, email, order_id)
+
+        return Response({'payment_url' : payment_url}, status=HTTP_200_OK)
+
+    @action(detail=True, methods=['GET'])
+
+    def success_payment(self, request, pk = None):
+
+        order = self.get_object()
+        order.pending_status = 'C'
+        order.save()
+        serializer = Order_serializer(order)
+
+        data = {
+            'msg' : 'payment_successfully..',
+            'data' : serializer.data
+        }
+
+        return Response(data)
 
     def get_serializer_class(self):
         if self.request.method=='POST':
