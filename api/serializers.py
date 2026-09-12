@@ -96,7 +96,8 @@ class add_cart_item_serializer(serializers.ModelSerializer):
             cart_item.save()
             self.instance = cart_item
 
-        except:
+        except Cartitems.DoesNotExist:
+           
            self.instance = Cartitems.objects.create(cart_id=cart_id, **self.validated_data)
         return self.instance
     class Meta:
@@ -162,11 +163,10 @@ class Order_serializer(serializers.ModelSerializer):
 class Order_Create_Serializer(serializers.Serializer):
 
     cart_id = serializers.UUIDField()
+    def save(self, **kwargs):
 
-    with transaction.atomic():
-
-        def save(self, **kwargs):
-
+        with transaction.atomic():
+        
             cart_id = self.validated_data['cart_id']
             user_id = self.context['user_id']
             order = Order.objects.create(owner_id = user_id)
@@ -184,7 +184,7 @@ class Order_Create_Serializer(serializers.Serializer):
             Cart.objects.get(cart_id=cart_id).delete()
 
             return order
-    
+        
 class Profile_serializer(serializers.ModelSerializer):
 
     class Meta:
