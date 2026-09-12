@@ -88,7 +88,7 @@ class Cart(models.Model):
     
     @property
     def cart_total(self):
-        cartitems = self.cartitems_set.all()
+        cartitems = self.items.all()
         qtysum = sum([ qty.subTotal for qty in cartitems])
         return qtysum
 
