@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404 
 from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
-from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_201_CREATED, HTTP_200_OK
+from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_201_CREATED, HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
@@ -52,8 +52,6 @@ def initiate_payment(amount, email, order_id):
 
     except Exception as e:
         return str(e)
-
-
 
 
 class Products_View_Set(ModelViewSet):
@@ -132,16 +130,27 @@ class Order_View_Set(ModelViewSet):
     def success_payment(self, request, pk = None):
 
         order = self.get_object()
-        order.pending_status = 'C'
-        order.save()
-        serializer = Order_serializer(order)
 
-        data = {
-            'msg' : 'payment_successfully..',
-            'data' : serializer.data
-        }
+        session_id = request.query_params.get('session_id')
 
-        return Response(data)
+        if not session_id:
+            return Response({'error': 'Session ID is required'}, status=HTTP_400_BAD_REQUEST)
+
+        try:
+            session = stripe.checkout.Session.retrieve(session_id)
+
+            if session.payment_status == 'paid':
+                order.pending_status = 'C'
+                order.save()
+                return Response({'message' : 'Payment successful and order status updated to Complete'}, status=HTTP_200_OK)
+
+            else:
+
+                return Response({'message' : 'Payment not completed'}, status=HTTP_400_BAD_REQUEST)
+            
+        except stripe.error.StripeError as e:
+            return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
+
 
     def get_serializer_class(self):
         if self.request.method=='POST':
